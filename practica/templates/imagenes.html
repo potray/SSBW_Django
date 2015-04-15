@@ -1,0 +1,5 @@
+{% include "menu.html" %}
+
+{% for imagen in imagenes %}
+<a href='{{imagen.link}}'><img src='{{imagen.url}}'/></a>
+{% endfor %}

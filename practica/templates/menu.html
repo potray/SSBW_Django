@@ -1,0 +1,27 @@
+{% load staticfiles %}
+<link href=" {% static 'practica2/css/materialize.min.css' %}" type="text/css" rel="stylesheet"/> 
+<script src=" {% static 'practica2/js/jquery-2.1.3.min.js' %}"></script>
+<script src=" {% static 'practica2/js/materialize.min.js' %}"></script>
+<script src=" {% static 'practica2/js/p2.js' %}"></script>
+
+<nav>
+	<div class="nav-wrapper indigo darken-4">
+		<a href="{% url 'inicio'%}" class="brand-logo">Práctica 2</a>
+		<ul id="nav-mobile" class="right hide-on-med-and-down">
+			<li><a href="{% url 'etsiit'%}">ETSIIT</a></li>
+			<li><a href="{% url 'imagenes'%}">Imágenes</a></li>
+			{% if logged != True %}
+			<li><a href="{% url 'registro'%}">Registro</a></li>
+			<li><a href="{% url 'login'%}">Login</a></li>
+			{% else %}
+			<li><a href="{% url 'inicio'%}">Salir</a></li>			
+			{% endif %}
+		</ul>
+	</div>
+</nav>
+
+{% if usuarioRegistrado = True%}
+	<script>
+		toast ("!Usuario registrado correctamente!", 4000);
+	</script>
+{% endif %}

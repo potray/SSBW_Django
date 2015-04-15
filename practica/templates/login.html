@@ -1,0 +1,27 @@
+{% include "menu.html" %}
+
+{% if errores == True %}
+	<div class="card-panel red darken-4" style="color:white;">
+		<h4>ERROR</h4>
+		{{error}}
+	</div>
+{% endif %}
+
+<h3>Login</h3>
+<div class="container">
+	<form action="{% url 'login' %}" method="post">{% csrf_token %}
+			<div class="row">
+				<div class="input-field col s6">
+					<label for="nombre">Nombre</label>
+					<input id="nombre" type="text" name="nombre" value="{{ nombre }}">
+				</div>
+			</div>
+			<div class="row">
+				<div class="input-field col s6">
+					<label for="password">Contraseña</label>
+					<input id="password" type="password" name="password" value="{{ password }}">
+				</div>
+			</div>
+		<input type="submit" value="Login" class="btn green">
+	</form>
+</div>

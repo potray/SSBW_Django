@@ -27,3 +27,5 @@ class FormularioLogin (forms.Form):
 		label = "Contraseña",
 		required = True,
 		)
+
+

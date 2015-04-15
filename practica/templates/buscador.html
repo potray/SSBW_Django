@@ -1,0 +1,34 @@
+{% include "menu.html" %}
+<div class="container">
+    <h3>Buscador</h3>
+    <form action="{% url 'buscador' %}" method="post">{% csrf_token %}
+        <input type="submit" value="Actualizar noticias" class="btn green">
+        <input type="hidden" name="borrar" value="false">
+    </form>
+    <form action="{% url 'buscador' %}" method="post">{% csrf_token %}
+        <input type="submit" value="Borrar noticias" class="btn red">
+        <input type="hidden" name="borrar" value="true">
+    </form>
+    <form action="{% url 'buscador' %}" method="get">{% csrf_token %}
+        <div class="input-field col s4">
+            <label for="etiqueta">Etiqueta</label>
+            <input id="etiqueta" type="text" name="etiqueta" value="{{ etiqueta }}">
+
+		    <input type="submit" value="Buscar" class="btn">
+        </div>
+    </form>
+    <h5>Hay {{contador}} noticias</h5>
+    {% for noticia in noticias%}
+    <div class="card indigo darken-4">
+        <div class="card-content white-text">
+
+            <span class="card-title">{{noticia.titulo}}</span>
+            <p>{{noticia.descripcion}}</p>
+            <p>{{noticia.fecha}}</p>
+        </div>
+        <div class="card-action">
+            <a href="{{noticia.enlace}}">Ir a la noticia</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>

@@ -16,10 +16,11 @@
 			{% else %}
 			<li><a href="{% url 'inicio'%}">Salir</a></li>			
 			{% endif %}
+            <li><a href="{% url 'buscador'%}">Buscador</a></li>
 		</ul>
 	</div>
 </nav>
-
+<br>
 {% if usuarioRegistrado = True%}
 	<script>
 		toast ("!Usuario registrado correctamente!", 4000);

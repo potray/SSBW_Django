@@ -93,9 +93,9 @@ def buscador(request):
                                                "enlace": enlace
                                                })
 
-            # Insertar las noticias en la base de datos
-            coleccion.insert_many(noticias_parseadas)
-            coleccion.update_many(noticias_parseadas)
+            # Insertar las noticias en la base de datos si hay alguna que insertar
+            if len(noticias_parseadas) > 0:
+                coleccion.insert_many(noticias_parseadas)
         elif borrar == 'true':
             # Borrar la coleccion entera
             coleccion.remove()

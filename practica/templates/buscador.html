@@ -11,6 +11,8 @@
     </div>
 
     <form action="{% url 'buscador' %}" method="post">{% csrf_token %}
+        <!--Uso este input oculto para guardar aquí via template de Django cuántas noticias se han actualizado-->
+        <input type="hidden" value="{{insertadas}}" id="noticiasInsertadas">
         <input type="submit" value="Actualizar noticias" class="btn green">
         <input type="hidden" name="borrar" value="false">
     </form>

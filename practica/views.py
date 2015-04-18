@@ -23,9 +23,9 @@ def bienvenida(request):
 
 def etsiit(request):
     # Descargar el árbol y extraer todos sus elementos address_component
-    arbolXML = etree.parse(
+    arbol_xml = etree.parse(
         'http://maps.googleapis.com/maps/api/geocode/xml?address=ETS+informatica+Granada&sensor=false')
-    items = arbolXML.xpath('//address_component')
+    items = arbol_xml.xpath('//address_component')
 
     context = {}
 
@@ -52,7 +52,7 @@ def buscador(request):
     cliente = MongoClient()
     # Seleccionar la base de datos
     baseDeDatos = cliente['noticias']
-    #Seleccionar la coleccion dentro de la base de datos
+    # Seleccionar la coleccion dentro de la base de datos
     coleccion = baseDeDatos['noticias']
 
     if request.method == 'POST':
@@ -66,33 +66,38 @@ def buscador(request):
             arbolXML = etree.fromstring(r.content)
             # Las noticias son los items
             noticias = arbolXML.xpath('//item')
-            noticiasParseadas = []
+            noticias_parseadas = []
 
             for noticia in noticias:
-                #Extraer titulo, fecha, etiquetas, descripcion y enlace de la noticia
+                # Extraer titulo, fecha, etiquetas, descripcion y enlace de la noticia
                 titulo = noticia.xpath('./title')[0].text
                 fecha = noticia.xpath('./pubDate')[0].text
-                descripcion = noticia.xpath('./description')[0].text
-                etiquetas = noticia.xpath('./category')
-                etiquetasParseadas = []
-                for e in etiquetas:
-                    etiquetasParseadas.append(e.text)
-                enlace = noticia.xpath('./link')[0].text
 
-                #Meterlas en la coleccion
-                noticiasParseadas.append({"titulo": titulo,
-                                          "descripcion": descripcion,
-                                          "fecha": fecha,
-                                          "etiquetas": etiquetasParseadas,
-                                          "enlace": enlace
-                                          })
-            #TODO hacer que no se repita
+                # Buscar una noticia con el mismo titulo y la misma fecha
+                busqueda_noticia = coleccion.find({'titulo': titulo, 'fecha': fecha})
 
-            #Insertar las noticias en la base de datos
-            coleccion.insert_many(noticiasParseadas)
-            coleccion.update_many(noticiasParseadas)
+                # Si no está repetida continúo.
+                if busqueda_noticia.count() == 0:
+                    descripcion = noticia.xpath('./description')[0].text
+                    etiquetas = noticia.xpath('./category')
+                    etiquetasParseadas = []
+                    for e in etiquetas:
+                        etiquetasParseadas.append(e.text)
+                    enlace = noticia.xpath('./link')[0].text
+
+                    #Meterlas en la coleccion
+                    noticias_parseadas.append({"titulo": titulo,
+                                               "descripcion": descripcion,
+                                               "fecha": fecha,
+                                               "etiquetas": etiquetasParseadas,
+                                               "enlace": enlace
+                                               })
+
+            # Insertar las noticias en la base de datos
+            coleccion.insert_many(noticias_parseadas)
+            coleccion.update_many(noticias_parseadas)
         elif borrar == 'true':
-            #Borrar la coleccion entera
+            # Borrar la coleccion entera
             coleccion.remove()
 
     else:
@@ -101,20 +106,20 @@ def buscador(request):
     noticias = []
 
     if etiqueta != '':
-        #Hacer la consulta
+        # Hacer la consulta
         elementos = coleccion.find({'etiquetas': etiqueta})
         print 'Buscando con etiqueta ' + etiqueta
     else:
         elementos = coleccion.find()
         print 'Buscando todos'
-    #Parsear la consulta
+    # Parsear la consulta
     for resultado in elementos:
         noticias.append({"titulo": resultado['titulo'],
                          "descripcion": resultado['descripcion'],
                          "fecha": resultado['fecha'],
                          "enlace": resultado['enlace']
                          })
-    #Meter las noticias en el contexto
+    # Meter las noticias en el contexto
     context = {'noticias': noticias, 'contador': len(noticias)}
 
     return render(request, 'buscador.html', context)

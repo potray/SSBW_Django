@@ -47,6 +47,7 @@ def etsiit(request):
 
 def buscador(request):
     etiqueta = ''
+    noticias_insertadas = 0
 
     # Conexion con el cliente de Mongo
     cliente = MongoClient()
@@ -56,7 +57,6 @@ def buscador(request):
     coleccion = baseDeDatos['noticias']
 
     if request.method == 'POST':
-
         borrar = request.POST['borrar']
         if borrar == 'false':
             # Sacar el xml utilizando requests
@@ -94,7 +94,8 @@ def buscador(request):
                                                })
 
             # Insertar las noticias en la base de datos si hay alguna que insertar
-            if len(noticias_parseadas) > 0:
+            noticias_insertadas = len(noticias_parseadas)
+            if noticias_insertadas > 0:
                 coleccion.insert_many(noticias_parseadas)
         elif borrar == 'true':
             # Borrar la coleccion entera
@@ -120,7 +121,7 @@ def buscador(request):
                          "enlace": resultado['enlace']
                          })
     # Meter las noticias en el contexto
-    context = {'noticias': noticias, 'contador': len(noticias)}
+    context = {'noticias': noticias, 'insertadas': noticias_insertadas}
 
     return render(request, 'buscador.html', context)
 

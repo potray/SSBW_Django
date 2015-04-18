@@ -1,6 +1,15 @@
 {% include "menu.html" %}
 <div class="container">
     <h3>Buscador</h3>
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h5>Se han añadido {{insertadas}} nuevas noticias</h5>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-action modal-close waver-effect waves-green btn-flat">Aceptar</a>
+        </div>
+    </div>
+
     <form action="{% url 'buscador' %}" method="post">{% csrf_token %}
         <input type="submit" value="Actualizar noticias" class="btn green">
         <input type="hidden" name="borrar" value="false">

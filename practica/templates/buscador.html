@@ -1,9 +1,12 @@
 {% include "menu.html" %}
+{% load staticfiles %}
+<script src=" {% static 'practica/js/buscador.js' %}"></script>
+
 <div class="container">
     <h3>Buscador</h3>
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h5>Se han añadido {{insertadas}} nuevas noticias</h5>
+            <h5>Se han añadido {{insertadas}} nuevas noticias.</h5>
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waver-effect waves-green btn-flat">Aceptar</a>
@@ -28,7 +31,6 @@
 		    <input type="submit" value="Buscar" class="btn">
         </div>
     </form>
-    <h5>Hay {{contador}} noticias</h5>
     {% for noticia in noticias%}
     <div class="card indigo darken-4">
         <div class="card-content white-text">

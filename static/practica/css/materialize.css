@@ -6852,6 +6852,9 @@ ul.side-nav .collapsible-body li.active, ul.side-nav.fixed .collapsible-body li.
   .preloader-wrapper.small {
     width: 36px;
     height: 36px; }
+  .preloader-wrapper.veryBig{
+    width: 256px;
+    height: 256px; }
   .preloader-wrapper.big {
     width: 64px;
     height: 64px; }

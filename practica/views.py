@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
+import json
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
+from django.views.decorators.http import require_http_methods
 from practica.forms import FormularioRegistro, FormularioLogin
 from lxml import etree
 import requests
 from pymongo import MongoClient
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_protect
 
 
 def inicio(request):
@@ -45,9 +48,77 @@ def etsiit(request):
     return render(request, 'etsiit.html', context)
 
 
+@csrf_protect
+@require_http_methods(["GET"])
+def actualizarNoticias(request):
+    # Conexion con el cliente de Mongo
+    cliente = MongoClient()
+    # Seleccionar la base de datos
+    baseDeDatos = cliente['noticias']
+    # Seleccionar la coleccion dentro de la base de datos
+    coleccion = baseDeDatos['noticias']
+
+    # Sacar el xml utilizando requests
+    r = requests.get('http://ep00.epimg.net/rss/elpais/portada.xml')
+    # Cargar el xml en un etree
+    arbolXML = etree.fromstring(r.content)
+    # Las noticias son los items
+    noticias = arbolXML.xpath('//item')
+    noticias_parseadas = []
+
+    for noticia in noticias:
+        # Extraer titulo, fecha, etiquetas, descripcion y enlace de la noticia
+        titulo = noticia.xpath('./title')[0].text
+        fecha = noticia.xpath('./pubDate')[0].text
+
+        # Buscar una noticia con el mismo titulo y la misma fecha
+        busqueda_noticia = coleccion.find({'titulo': titulo, 'fecha': fecha})
+
+        # Si no está repetida continúo.
+        if busqueda_noticia.count() == 0:
+            descripcion = noticia.xpath('./description')[0].text
+            etiquetas = noticia.xpath('./category')
+            etiquetasParseadas = []
+            for e in etiquetas:
+                etiquetasParseadas.append(e.text)
+            enlace = noticia.xpath('./link')[0].text
+
+            # Meterlas en la coleccion
+            noticias_parseadas.append({"titulo": titulo,
+                                       "descripcion": descripcion,
+                                       "fecha": fecha,
+                                       "etiquetas": etiquetasParseadas,
+                                       "enlace": enlace
+                                       })
+
+    # Insertar las noticias en la base de datos si hay alguna que insertar
+    noticias_insertadas = len(noticias_parseadas)
+    if noticias_insertadas > 0:
+        print "Insertando muchas noticias"
+        coleccion.insert_many(noticias_parseadas)
+
+    noticias = []
+
+    elementos = coleccion.find()
+    # Parsear la consulta
+    for resultado in elementos:
+        noticias.append(json.dumps({"titulo": resultado['titulo'],
+                                    "descripcion": resultado['descripcion'],
+                                    "fecha": resultado['fecha'],
+                                    "enlace": resultado['enlace']
+                                    }))
+    # Meter las noticias en la respuesta
+    context = json.dumps({'noticias': noticias, 'insertadas': noticias_insertadas})
+
+    print 'enviando respuesta'
+    return HttpResponse(
+        context,
+        content_type="application/json"
+    )
+
+
 def buscador(request):
     etiqueta = ''
-    noticias_insertadas = 0
 
     # Conexion con el cliente de Mongo
     cliente = MongoClient()
@@ -58,47 +129,9 @@ def buscador(request):
 
     if request.method == 'POST':
         borrar = request.POST['borrar']
-        if borrar == 'false':
-            # Sacar el xml utilizando requests
-            # TODO hacer que se baje todas las paginas del pais, no solo la de portada
-            r = requests.get('http://ep00.epimg.net/rss/elpais/portada.xml')
-            # Cargar el xml en un etree
-            arbolXML = etree.fromstring(r.content)
-            # Las noticias son los items
-            noticias = arbolXML.xpath('//item')
-            noticias_parseadas = []
-
-            for noticia in noticias:
-                # Extraer titulo, fecha, etiquetas, descripcion y enlace de la noticia
-                titulo = noticia.xpath('./title')[0].text
-                fecha = noticia.xpath('./pubDate')[0].text
-
-                # Buscar una noticia con el mismo titulo y la misma fecha
-                busqueda_noticia = coleccion.find({'titulo': titulo, 'fecha': fecha})
-
-                # Si no está repetida continúo.
-                if busqueda_noticia.count() == 0:
-                    descripcion = noticia.xpath('./description')[0].text
-                    etiquetas = noticia.xpath('./category')
-                    etiquetasParseadas = []
-                    for e in etiquetas:
-                        etiquetasParseadas.append(e.text)
-                    enlace = noticia.xpath('./link')[0].text
-
-                    #Meterlas en la coleccion
-                    noticias_parseadas.append({"titulo": titulo,
-                                               "descripcion": descripcion,
-                                               "fecha": fecha,
-                                               "etiquetas": etiquetasParseadas,
-                                               "enlace": enlace
-                                               })
-
-            # Insertar las noticias en la base de datos si hay alguna que insertar
-            noticias_insertadas = len(noticias_parseadas)
-            if noticias_insertadas > 0:
-                coleccion.insert_many(noticias_parseadas)
-        elif borrar == 'true':
+        if borrar == 'true':
             # Borrar la coleccion entera
+            print "Borrando noticias"
             coleccion.remove()
 
     else:
@@ -113,6 +146,7 @@ def buscador(request):
     else:
         elementos = coleccion.find()
         print 'Buscando todos'
+
     # Parsear la consulta
     for resultado in elementos:
         noticias.append({"titulo": resultado['titulo'],
@@ -121,8 +155,9 @@ def buscador(request):
                          "enlace": resultado['enlace']
                          })
     # Meter las noticias en el contexto
-    context = {'noticias': noticias, 'insertadas': noticias_insertadas}
+    context = {'noticias': noticias}
 
+    print "Enviando noticias"
     return render(request, 'buscador.html', context)
 
 

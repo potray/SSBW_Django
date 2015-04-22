@@ -1,24 +1,22 @@
 {% include "menu.html" %}
 {% load staticfiles %}
+{% load i18n %}
 <script src=" {% static 'practica/js/buscador.js' %}"></script>
 
 <div class="container">
-    <h3>Buscador</h3>
+    <h3>{% trans "Buscador" %}</h3>
+
     <div id="modal" class="modal">
         <div class="modal-content">
-            <h5>Se han añadido {{insertadas}} nuevas noticias.</h5>
+            <h5 id="textoModal"></h5>
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-action modal-close waver-effect waves-green btn-flat">Aceptar</a>
         </div>
     </div>
 
-    <form action="{% url 'buscador' %}" method="post">{% csrf_token %}
-        <!--Uso este input oculto para guardar aquí via template de Django cuántas noticias se han actualizado-->
-        <input type="hidden" value="{{insertadas}}" id="noticiasInsertadas">
-        <input type="submit" value="Actualizar noticias" class="btn green">
-        <input type="hidden" name="borrar" value="false">
-    </form>
+    <input type="submit" value="Actualizar noticias" class="btn green" id="actualizarNoticias">
+
     <form action="{% url 'buscador' %}" method="post">{% csrf_token %}
         <input type="submit" value="Borrar noticias" class="btn red">
         <input type="hidden" name="borrar" value="true">
@@ -28,20 +26,73 @@
             <label for="etiqueta">Etiqueta</label>
             <input id="etiqueta" type="text" name="etiqueta" value="{{ etiqueta }}">
 
-		    <input type="submit" value="Buscar" class="btn">
+            <input type="submit" value="Buscar" class="btn">
         </div>
     </form>
-    {% for noticia in noticias%}
-    <div class="card indigo darken-4">
-        <div class="card-content white-text">
-
-            <span class="card-title">{{noticia.titulo}}</span>
-            <p>{{noticia.descripcion}}</p>
-            <p>{{noticia.fecha}}</p>
+    <div class="preloader-wrapper veryBig active" id="preloader">
+        <div class="spinner-layer spinner-blue">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
         </div>
-        <div class="card-action">
-            <a href="{{noticia.enlace}}">Ir a la noticia</a>
+
+        <div class="spinner-layer spinner-red">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
+        </div>
+
+        <div class="spinner-layer spinner-yellow">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
+        </div>
+
+        <div class="spinner-layer spinner-green">
+            <div class="circle-clipper left">
+                <div class="circle"></div>
+            </div>
+            <div class="gap-patch">
+                <div class="circle"></div>
+            </div>
+            <div class="circle-clipper right">
+                <div class="circle"></div>
+            </div>
         </div>
     </div>
-    {% endfor %}
+    <div id="noticias">
+        {% for noticia in noticias%}
+        <div class="card indigo darken-4">
+            <div class="card-content white-text">
+
+                <span class="card-title">{{noticia.titulo}}</span>
+
+                <p>{{noticia.descripcion}}</p>
+
+                <p>{{noticia.fecha}}</p>
+            </div>
+            <div class="card-action">
+                <a href="{{noticia.enlace}}">{%trans "Ir a la noticia"%}</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>

@@ -8,5 +8,7 @@ urlpatterns = patterns('',
                        url(r'bienvenida/', views.bienvenida, name='bienvenida'),
                        url(r'etsiit/', views.etsiit, name='etsiit'),
                        url(r'imagenes/', views.imagenes, name='imagenes'),
+                       url(r'actualizarNoticias/', views.actualizarNoticias, name='actualizarNoticias'),
                        url(r'buscador/', views.buscador, name='buscador'),
+
                        )
